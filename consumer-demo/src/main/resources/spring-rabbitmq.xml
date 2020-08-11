@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
+
+    <description>rabbitmq 服务配置</description>
+    <!-- 公共部分 -->
+    <!-- 创建连接类 连接安装好的 rabbitmq -->
+    <bean id="connectionFactory"  class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
+        <constructor-arg value="localhost" />
+        <property name="virtualHost" value="${rabbitmq.virtualHost}" />
+        <!-- host,RabbitMQ服务器地址，默认值"localhost" -->
+        <property name="host" value="${rabbitmq.ip}" />
+        <!-- port，RabbitMQ服务端口，默认值为5672 -->
+        <property name="port" value="${rabbitmq.port}" />
+        <!-- username,访问RabbitMQ服务器的账户,默认是guest -->
+        <property name="username" value="${rabbitmq.username}" />
+        <!-- username,访问RabbitMQ服务器的密码,默认是guest -->
+        <property name="password" value="${rabbitmq.password}" />
+        <!-- channel-cache-size，channel的缓存数量，默认值为25 -->
+        <property name="channelCacheSize" value="${rabbitmq.channelCacheSize}" />
+        <!-- cache-mode，缓存连接模式，默认值为CHANNEL(单个connection连接，连接之后关闭，自动销毁) -->
+        <property name="cacheMode" value="CHANNEL" />
+    </bean>
+
+    <!-- 消费者部分 -->
+    <!-- 自定义消费者类 -->
+    <bean id="consumerOne" class="com.rabbitmq.consumerdemo.consumer.ConsumerOne"></bean>
+    <bean id="consumerTwo" class="com.rabbitmq.consumerdemo.consumer.ConsumerTwo"></bean>
+    <!-- 配置监听，默认acknowledge="auto",可以设置手动应答acknowledge="manual"-->
+    <rabbit:listener-container connection-factory="connectionFactory">
+        <!--此处queue-names对应的是定义queue的name而不是id-->
+        <rabbit:listener queue-names="${test_queue_one}" ref="consumerOne" />
+        <rabbit:listener queue-names="${test_queue_two}" ref="consumerTwo" />
+    </rabbit:listener-container>
+
+
+</beans>
